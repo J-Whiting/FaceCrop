@@ -1,43 +1,85 @@
-import sys
-import cv2
+import cv2 as cv
 import numpy as np
+from options import Options
+import sys
 
 
 def main():
-    # Files
-    imageFile = "00001.png"
-    templateFile = "template.png"
 
-    # Read the images
-    image = cv2.imread(imageFile)
-    template = cv2.imread(templateFile)
+    # Options
+    options = Options().get_options()
+
+    # Files
+    image_file = "woody//00001.png"
+    template_file = "template//woody1.png"
+
+    # Load the images
+    image = cv.imread(image_file)
 
     # Convert to grayscale
-    grayImage = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    grayTemplate = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
+    image_gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    image_gray = cv.equalizeHist(image_gray)
 
-    w, h = grayTemplate.shape[::-1]
+    if options.mode == "cascade":
+        # Load the cascade file
+        cascade_file = cv.CascadeClassifier("cascade//haarcascade_frontalface_default.xml")
 
-    # Apply template Matching
-    res = cv2.matchTemplate(grayImage, grayTemplate, cv2.TM_CCOEFF_NORMED)
-    threshold = 0.4
-    print(np.max(res))
+        # Detect faces in the image
+        rects = cascade_file.detectMultiScale(
+            image_gray,
+            scaleFactor=1.1,
+            minNeighbors=5,
+            minSize=(30, 30),
+            flags=cv.CV_HAAR_SCALE_IMAGE
+        )
 
-    """if np.any(res >= threshold):
-        _, _, _, max_loc = cv2.minMaxLoc(res)
 
-        top_left = max_loc
-        bottom_right = (top_left[0] + w, top_left[1] + h)
+        # TODO:
+        rects[:, 2:] += rects[:, :2]
 
-        cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)"""
+        # Draw rectangles over the matches
+        for (x, y, w, h) in rects:
+            cv.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
-    loc = np.where(res >= threshold)
-    for pt in zip(*loc[::-1]):
-        cv2.rectangle(image, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
+    elif options.mode == "template":
+        # Load the template file
 
-    # cv2.imwrite('res.png', image)
-    cv2.imshow("", image)
-    cv2.waitKey(0)
+        template = cv.imread(template_file)
+
+        # Convert to grayscale
+        template_gray = cv.cvtColor(template, cv.COLOR_BGR2GRAY)
+
+        # Get template height and width
+        w, h = template_gray.shape[::-1]
+
+        # Apply template Matching
+        res = cv.matchTemplate(image_gray, template_gray, cv.TM_CCOEFF_NORMED)
+        threshold = 0.4
+        print(np.max(res))
+
+        """if np.any(res >= threshold):
+            _, _, _, max_loc = cv2.minMaxLoc(res)
+    
+            top_left = max_loc
+            bottom_right = (top_left[0] + w, top_left[1] + h)
+    
+            cv2.rectangle(image, top_left, bottom_right, (255, 0, 0), 2)"""
+
+        # Filtering results to examples over the threshold
+        location = np.where(res >= threshold)
+
+        # Draw rectangles over the matches
+        for x, y in zip(*location[::-1]):
+            cv.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+    else:
+        print("Incorrect mode selected")
+        sys.exit()
+
+    # cv.imwrite('res.png', image)
+    # Show the results
+    cv.imshow("", image)
+    cv.waitKey(0)
 
 
 if __name__ == '__main__':
