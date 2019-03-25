@@ -1,8 +1,6 @@
 import cv2 as cv
-import numpy as np
 from options import Options
 import os.path
-import sys
 
 if __name__ == "__main__":
     # Options
