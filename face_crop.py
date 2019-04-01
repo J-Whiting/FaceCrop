@@ -26,14 +26,14 @@ if __name__ == "__main__":
 
     # Create scene tuples
     scenes = []
-	if len(s) == 0:
-		# If scenes.txt is empty, check all scenes in the video
-		scenes.append(0, float("inf"))
-	else:
-		# Otherwise declare all individual scenes into a start frame and end frame
-		for i in s:
-			p = i.split(":")
-			scenes.append((int(p[0]), int(p[1])))
+    if len(s) == 0:
+        # If scenes.txt is empty, check all scenes in the video
+        scenes.append(0, float("inf"))
+    else:
+        # Otherwise declare all individual scenes into a start frame and end frame
+        for i in s:
+            p = i.split(":")
+            scenes.append((int(p[0]), int(p[1])))
 
     print(scenes)
 
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         cap.set(cv.CAP_PROP_POS_FRAMES, scene[0])
 
         while cap.isOpened():
-#
+            #
             # Capture frame
             ret, frame = cap.read()
 
@@ -72,7 +72,8 @@ if __name__ == "__main__":
                     zoom = cv.resize(crop, (options.output_size, options.output_size))
 
                     # Saving the frames
-                    filename = os.path.join(options.output_folder, str(int(cap.get(cv.CAP_PROP_POS_FRAMES))) + "-" + str(i) + ".png")
+                    filename = os.path.join(options.output_folder,
+                                            str(int(cap.get(cv.CAP_PROP_POS_FRAMES))) + "-" + str(i) + ".png")
                     print(filename)
                     cv.imwrite(filename, zoom)
                     with open("scene_info.txt", "a") as scene_info:
