@@ -16,12 +16,12 @@ Program to take an image and crop to just a face
 
 - Manually check the generated frames and remove any incorrect files.
 
-- As there can only be 1 correct face at a time, you can run `create_duplicate_list.py` to highlight frames which contain more than 1 image. Manually remove any duplicated images.
+- As there can only be 1 correct face at a time, you can run `check_duplicates.py` to highlight frames which contain more than 1 image. Manually remove any duplicated images.
 
 - Once there is only 1 of each frame, run `clean_filenames.py` to clean filenames, and remove deleted frames from `scene_info.txt`.
 
-- There may be several frames where the classifier failed to recognise the face, run `create_missing_images.py` to create missing images by taking averages of frames before and after the gap.  The script has a variable `gap` that signifies how many frames it should fill if it finds a gap that size. This can work up to any size, but depending on the video large values may add unwanted extra frames.
+- Run `check_missing_images.py` to highlight the gaps in the scenes. If there are gaps run `create_missing_images.py` to create missing images by taking averages of frames before and after the gap.  The script has a variable `gap` that signifies how many frames it should fill if it finds a gap that size. This can work up to any size, but depending on the video large values may add unwanted extra frames.
 
-- Run `create_triplets.py` to concatenate 3 frames together into 1 image.  This is the input required for the RecycleGAN project.
+- Run `create_triplets.py` to concatenate 3 frames together into 1 image in the `triplets` folder.  This is the input required for the RecycleGAN project.
 
 ![Triplets](images/triplets.png)
