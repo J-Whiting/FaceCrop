@@ -19,35 +19,69 @@ if __name__ == "__main__":
     # Opening the video file
     cap = cv.VideoCapture(options.video_file)
 
-    # TODO: Debug
-    cap.set(cv.CAP_PROP_POS_FRAMES, 11002)
+    # Read the scene list into the list
+    with open("scenes.txt", "r") as f:
+        s = f.read().split("\n")
+    print(s)
 
-    while cap.isOpened():
+    # Create scene tuples
+    scenes = []
+	if len(s) == 0:
+		# If scenes.txt is empty, check all scenes in the video
+		scenes.append(0, float("inf"))
+	else:
+		# Otherwise declare all individual scenes into a start frame and end frame
+		for i in s:
+			p = i.split(":")
+			scenes.append((int(p[0]), int(p[1])))
 
-        # Capture frame
-        ret, frame = cap.read()
+    print(scenes)
 
-        if ret:
-            # Convert to grayscale
-            frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-            frame_gray = cv.equalizeHist(frame_gray)
+    for scene in scenes:
 
-            # Detect faces in the image
-            rects = classifier.detectMultiScale(frame_gray)
+        # TODO: Debug
+        # cap.set(cv.CAP_PROP_POS_FRAMES, 29992)
+        cap.set(cv.CAP_PROP_POS_FRAMES, scene[0])
 
-            for (x, y, w, h) in rects:
-                # Crop image
-                crop = frame[y:y + h, x:x + w]
+        while cap.isOpened():
+#
+            # Capture frame
+            ret, frame = cap.read()
 
-                # Resize image to `output_size` pixels
-                zoom = cv.resize(crop, (options.output_size, options.output_size))
+            if int(cap.get(cv.CAP_PROP_POS_FRAMES)) >= scene[1]:
+                break
 
-                # Saving the frames
-                cv.imwrite(os.path.join(options.output_folder, str(int(cap.get(cv.CAP_PROP_POS_FRAMES))) + ".png"),
-                           zoom)
+            if ret:
+                # Convert to grayscale
+                frame_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+                frame_gray = cv.equalizeHist(frame_gray)
 
-        else:
-            break
+                # Detect faces in the image
+                rects = classifier.detectMultiScale(frame_gray)
+
+                i = 1
+                for (x, y, w, h) in rects:
+
+                    if w < 256:
+                        continue
+
+                    # Crop image
+                    crop = frame[y:y + h, x:x + w]
+
+                    # Resize image to `output_size` pixels
+                    zoom = cv.resize(crop, (options.output_size, options.output_size))
+
+                    # Saving the frames
+                    filename = os.path.join(options.output_folder, str(int(cap.get(cv.CAP_PROP_POS_FRAMES))) + "-" + str(i) + ".png")
+                    print(filename)
+                    cv.imwrite(filename, zoom)
+                    with open("scene_info.txt", "a") as scene_info:
+                        scene_info.write(filename + " " + str(x) + " " + str(y) + " " + str(w) + " " + str(h) + "\n")
+                    # cv.imwrite(os.path.join(options.output_folder, str(int(cap.get(cv.CAP_PROP_POS_FRAMES))) + ".png"), zoom)
+                    i += 1
+
+            else:
+                break
 
     # Closing the video file
     cap.release()
