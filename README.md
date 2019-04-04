@@ -2,6 +2,20 @@
 
 Program to take an image and crop to just a face
 
+There are 3 pre-trained classifiers in the `classifiers` folder
+
+### Anna from Frozen (2013)
+
+![Anna](images/anna.png)
+
+### Wreck-It Ralph from Wreck-It Ralph (2012)
+
+![Anna](images/ralph.png)
+
+### Woody from Toy Story (1995)
+
+![Anna](images/woody.png)
+
 ### Packages
 
 `pip install -r requirements.txt`
